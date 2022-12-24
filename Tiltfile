@@ -10,3 +10,16 @@ k8s_yaml(
     helm("charts/tedep-controller", namespace="tedep", values=["local.values.yaml"])
 )
 k8s_resource("tedep-controller", port_forwards=8080)
+k8s_resource(objects=["tedep:Namespace"], new_name="tedep namespace")
+k8s_resource(
+    objects=[
+        "tedep-controller:ServiceAccount",
+        "tedep-controller:Role",
+        "tedep-controller:RoleBinding",
+    ],
+    new_name="tedep rbac",
+)
+k8s_resource(
+    objects=["terraformworkspaces.tedep.quantum-box.com:CustomResourceDefinition"],
+    new_name="tedep crds",
+)
