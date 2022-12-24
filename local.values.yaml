@@ -28,6 +28,10 @@ controller:
 
   serviceAccount:
     automountServiceAccountToken: true
+  
+  env:
+  - name: RUST_LOG
+    value: "info,kube=debug,tedep-ep=debug"
 
 global:
   labels: {}

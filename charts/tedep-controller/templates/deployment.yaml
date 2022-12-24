@@ -69,3 +69,7 @@ spec:
           timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
           successThreshold: {{ .Values.controller.readinessProbe.successThreshold }}
           failureThreshold: {{.Values.controller.readinessProbe.failureThreshold }}
+        env:
+          {{- with .Values.controller.env }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}

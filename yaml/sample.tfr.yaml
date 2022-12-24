@@ -1,0 +1,6 @@
+apiVersion: tedep.quantum-box.com/v1
+kind: TerraformResource
+metadata:
+  name: sample-resource
+  namespace: tedep
+spec: {}

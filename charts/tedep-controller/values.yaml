@@ -28,6 +28,10 @@ controller:
 
   serviceAccount:
     automountServiceAccountToken: true
+  
+  env:
+  # - name: EXAMPLE
+  #   value: example-value
 
 global:
   labels: {}
