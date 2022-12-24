@@ -1,0 +1,17 @@
+apiVersion: v2
+name: tedep-controller
+version: 0.1.0
+description: More flexible dependency management for Terraform by Kubernetes Operator 
+type: application
+keywords: ["terraform", "operator"]
+home: https://github.com/quantum-box/tedep
+sources: ["https://github.com/quantum-box/tedep"]
+dependencies: []
+maintainers:
+  - name: megumish
+    email: megumish@exploitouri.st
+    url: "https://github.com/megumish"
+appVersion: "0.1.0"
+deprecated: false
+annotations:
+  tedep.quantum-box.com: ""

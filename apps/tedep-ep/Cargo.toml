@@ -6,3 +6,30 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# async/await runtime
+tokio = { version = "1.23", features = ["rt", "rt-multi-thread", "macros"] }
+# async/await library
+futures = { version = "0.3" }
+# logging support
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# kubernetes library
+kube = { version = "0.77", features = ["derive", "runtime"] }
+k8s-openapi = { version = "0.16", features = ["v1_23"] }
+# http server
+axum = "0.6"
+tower-http = { version = "0.3", features = ["trace"] }
+http = "0.2"
+hyper = "0.14"
+# http server tests
+tower-test = "0.4"
+# serialization library
+serde = "1.0"
+serde_json = "1.0"
+serde_yaml = "0.9"
+# json schema support
+schemars = "0.8"
+# error library
+thiserror = "1.0"
+# commandline argument parser
+clap = { version = "4.0", features = ["derive"] }

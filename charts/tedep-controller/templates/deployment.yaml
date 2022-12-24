@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.controller.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ template "tedep.controller.fullname" . }}
+  labels:
+    {{- include "tedep.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tedep.selectorLabels" (dict "context" . "name" .Values.controller.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.controller.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "tedep.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.controller.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.controller.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.secrutiyContext | default .Values.global.securityContext }}
+      secrutiyContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    containers:
+    - command:
+      - controller
+      - run
+      {{- with .Values.controller.resourcesNamespace | default .Release.Namespace }}
+      - --namespace-str
+      - {{ . | quote }}
+      {{- end }}
+      {{- with .Values.controller.reconcileIntervalSeconds }}
+      - --reconcile-interval
+      - {{ . }}
+      {{- end }}
+      {{- with .Values.controller.retryIntervalSeconds }}
+      - --retry-interval
+      - {{ . }}
+      {{- end }}
+      image: {{ .Values.controller.image.repository -}}:{{- default .Chart.AppVersion .Values.controller.image.tag }}
+      imagePullPolicy: {{ default "Always" .Values.controller.imagePullPolicy }}
+      name: {{ .Values.controller.name }}
+      ports:
+      - name: metrics
+        contaienrPort: {{ .Values.controller.containerPort }}
+        protocol: HTTP
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: metrics
+        initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
+        periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
+        timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
+        successThreshold: {{ .Values.controller.readinessProbe.successThreshold }}
+        failureThreshold: {{.Values.controller.readinessProbe.failureThreshold }}
+      serviceAccountName: {{ template "tedep.controller.fullname" . }}

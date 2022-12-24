@@ -1,0 +1,40 @@
+name: "tedep"
+
+controller:
+  name: "controller"
+  image:
+    repository: "quantum-box/tedep"
+    tag: "latest"
+  imagePullPolicy: Always
+  metricsContainerPort: 8080
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+  deploymentAnnotations: {}
+
+  podAnnotations: {}
+  podLabels: {}
+
+  imagePullSecrets: {}
+
+  resourcesNamespace: "tedep"
+  reconcileIntervalSeconds: 60
+  retryIntervalSeconds: 60
+
+  serviceAccount:
+    automountServiceAccountToken: true
+
+global:
+  labels: {}
+
+  deploymentAnnotations: {}
+
+  podAnnotations: {}
+  podLabels: {}
+
+  imagePullSecrets: {}
