@@ -9,12 +9,13 @@ COPY ./Cargo.toml .
 COPY ./Cargo.lock .
 COPY ./apps ./apps
 COPY ./crates ./crates
+ENV RUSTFLAGS="-C target-feature=+crt-static"
 
 RUN --mount=type=cache,target=/root/.cargo \
   --mount=type=cache,target=/root/target \
   cargo build -p tedep-ep --release --target x86_64-unknown-linux-gnu --target-dir /root/target \
-  && cp /root/target/x86_64-unknown-linux-gnu/release/tedep-ep /controller
+  && cp /root/target/x86_64-unknown-linux-gnu/release/tedep-ep /controller 
 
-FROM gcr.io/distroless/cc
+FROM gcr.io/distroless/static:nonroot
 
 COPY --from=builder /controller .
