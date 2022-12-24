@@ -9,5 +9,5 @@ rules:
   resources: ["namespaces"]
   verbs: ["get"]
 - apiGroups: ["tedep.quantum-box.com"]
-  resources: ["terraformresources"]
+  resources: ["terraformworkspaces"]
   verbs: ["list", "watch", "patch"]

@@ -1,6 +1,8 @@
 apiVersion: tedep.quantum-box.com/v1
-kind: TerraformResource
+kind: TerraformWorkspace
 metadata:
-  name: sample-resource
+  name: sample-workspace
   namespace: tedep
-spec: {}
+spec:
+  provider:
+    name: terraform-cloud

@@ -42,7 +42,6 @@ spec:
         - ./controller
         - run
         {{- with .Values.controller.resourcesNamespace | default .Release.Namespace }}
-        - --namespace-str
         - {{ . | quote }}
         {{- end }}
         {{- with .Values.controller.reconcileIntervalSeconds }}
