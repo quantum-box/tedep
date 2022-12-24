@@ -28,6 +28,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: {{ template "tedep.controller.fullname" . }}
       {{- with .Values.controller.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -36,36 +37,35 @@ spec:
       secrutiyContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    containers:
-    - command:
-      - controller
-      - run
-      {{- with .Values.controller.resourcesNamespace | default .Release.Namespace }}
-      - --namespace-str
-      - {{ . | quote }}
-      {{- end }}
-      {{- with .Values.controller.reconcileIntervalSeconds }}
-      - --reconcile-interval
-      - {{ . }}
-      {{- end }}
-      {{- with .Values.controller.retryIntervalSeconds }}
-      - --retry-interval
-      - {{ . }}
-      {{- end }}
-      image: {{ .Values.controller.image.repository -}}:{{- default .Chart.AppVersion .Values.controller.image.tag }}
-      imagePullPolicy: {{ default "Always" .Values.controller.imagePullPolicy }}
-      name: {{ .Values.controller.name }}
-      ports:
-      - name: metrics
-        contaienrPort: {{ .Values.controller.containerPort }}
-        protocol: HTTP
-      readinessProbe:
-        httpGet:
-          path: /health
-          port: metrics
-        initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
-        periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
-        timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
-        successThreshold: {{ .Values.controller.readinessProbe.successThreshold }}
-        failureThreshold: {{.Values.controller.readinessProbe.failureThreshold }}
-      serviceAccountName: {{ template "tedep.controller.fullname" . }}
+      containers:
+      - command:
+        - ./controller
+        - run
+        {{- with .Values.controller.resourcesNamespace | default .Release.Namespace }}
+        - --namespace-str
+        - {{ . | quote }}
+        {{- end }}
+        {{- with .Values.controller.reconcileIntervalSeconds }}
+        - --reconcile-interval
+        - {{ . | quote }}
+        {{- end }}
+        {{- with .Values.controller.retryIntervalSeconds }}
+        - --retry-interval
+        - {{ . | quote }}
+        {{- end }}
+        image: {{ .Values.controller.image.repository -}}:{{- default .Chart.AppVersion .Values.controller.image.tag }}
+        imagePullPolicy: {{ default "Always" .Values.controller.imagePullPolicy }}
+        name: {{ .Values.controller.name }}
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.controller.metricsContainerPort }}
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: metrics
+          initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.controller.readinessProbe.successThreshold }}
+          failureThreshold: {{.Values.controller.readinessProbe.failureThreshold }}

@@ -4,4 +4,10 @@ metadata:
   name: {{ template "tedep.controller.fullname" . }}
   labels:
     {{- include "tedep.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
-rules: []
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get"]
+- apiGroups: ["tedep.quantum-box.com"]
+  resources: ["terraformresources"]
+  verbs: ["list"]

@@ -14,7 +14,7 @@ futures = { version = "0.3" }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # kubernetes library
-kube = { version = "0.77", features = ["derive", "runtime"] }
+kube = { version = "0.77", features = ["client", "derive", "runtime", "rustls-tls"], default-features = false }
 k8s-openapi = { version = "0.16", features = ["v1_23"] }
 # http server
 axum = "0.6"
