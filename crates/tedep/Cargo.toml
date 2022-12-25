@@ -2,6 +2,12 @@
 name = "tedep"
 version = "0.1.0"
 edition = "2021"
+description = "tedep controller library"
+license = "MIT"
+repository = "https://github.com/quantum-box/tedep"
+readme = "../../README.md"
+keywords = ["k8s", "kubernetes", "terraform"]
+categories = ["k8s", "kubernetes"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
