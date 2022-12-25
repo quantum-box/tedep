@@ -13,10 +13,10 @@ impl GlobalConfig {
         &self.namespace_str
     }
     pub fn reconcile_interval(&self) -> Duration {
-        self.reconcile_interval.clone()
+        self.reconcile_interval
     }
     pub fn retry_interval(&self) -> Duration {
-        self.retry_interval.clone()
+        self.retry_interval
     }
 
     pub(crate) fn from_run_args(args: &RunArgs) -> Self {

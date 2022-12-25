@@ -47,7 +47,8 @@ async fn main() {
     match args.command {
         Command::Run(args) => {
             let logger = tracing_subscriber::fmt::layer();
-            let env_filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info"));
+            let env_filter =
+                EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
             let collector = Registry::default().with(logger).with(env_filter);
 

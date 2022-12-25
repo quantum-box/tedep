@@ -42,10 +42,10 @@ where
         let metrics = Self::Metrics::default();
         {
             let namespace = kube::Api::<Namespace>::all(client.clone());
-            let _ = namespace.get(&global_config.namespace_str()).await?;
+            let _ = namespace.get(global_config.namespace_str()).await?;
         }
         let resources =
-            kube::Api::<Self::Resource>::namespaced(client.clone(), &global_config.namespace_str());
+            kube::Api::<Self::Resource>::namespaced(client.clone(), global_config.namespace_str());
         // check if CRD is available
         let _ = resources.list(&ListParams::default().limit(1)).await?;
         Ok((
