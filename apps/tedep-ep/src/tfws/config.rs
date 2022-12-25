@@ -4,13 +4,16 @@ use super::TerraformWorkspace;
 
 #[derive(Clone, Default)]
 pub struct TerraformWorkspaceConfig {
-    dynamic_type: <TerraformWorkspace as kube::Resource>::DynamicType,
+  dynamic_type:
+    <TerraformWorkspace as kube::Resource>::DynamicType,
 }
 
 impl Config for TerraformWorkspaceConfig {
-    type Resource = TerraformWorkspace;
+  type Resource = TerraformWorkspace;
 
-    fn dynamic_type(&self) -> &<Self::Resource as kube::Resource>::DynamicType {
-        &self.dynamic_type
-    }
+  fn dynamic_type(
+    &self,
+  ) -> &<Self::Resource as kube::Resource>::DynamicType {
+    &self.dynamic_type
+  }
 }
