@@ -65,14 +65,6 @@ async fn main() {
                 .await
                 .unwrap();
             let metrics = GlobalMetrics::new(tfws_metrics);
-            // let (controller, state) = init_tfr_controller(
-            //     client,
-            //     namespace_str,
-            //     Duration::from_secs(args.reconcile_interval),
-            //     Duration::from_secs(args.retry_interval),
-            // )
-            // .await
-            // .unwrap();
 
             let http_app = Router::new()
                 .route(
