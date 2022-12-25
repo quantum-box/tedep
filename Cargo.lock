@@ -845,6 +845,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "kubox"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "k8s-openapi",
+ "kube",
+ "serde",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1549,6 +1562,7 @@ dependencies = [
  "hyper",
  "k8s-openapi",
  "kube",
+ "kubox",
  "schemars",
  "serde",
  "serde_json",

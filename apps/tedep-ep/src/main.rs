@@ -2,7 +2,12 @@ use axum::{
   http::StatusCode, response::IntoResponse, Json, Router,
 };
 use clap::{Args, Parser, Subcommand};
-use kube::CustomResourceExt;
+use futures::select;
+use k8s_openapi::api::core::v1::Namespace;
+use kube::{
+  runtime::controller::Action, CustomResourceExt,
+};
+use tfws::error::TerraformWorkspaceError;
 use tower_http::trace::TraceLayer;
 use tracing::{info, log::warn};
 use tracing_subscriber::{prelude::*, EnvFilter, Registry};
@@ -11,7 +16,8 @@ use crate::{
   config::GlobalConfig,
   metrics::GlobalMetrics,
   tfws::{
-    config::TerraformWorkspaceConfig, TerraformWorkspace,
+    config::TerraformWorkspaceConfig,
+    metrics::TerraformWorkspaceMetrics, TerraformWorkspace,
     TerraformWorkspaceController,
   },
 };
@@ -63,18 +69,14 @@ async fn main() {
 
       let client =
         kube::Client::try_default().await.unwrap();
-      let global_config =
-        GlobalConfig::from_run_args(&args);
-      let tfws_config = TerraformWorkspaceConfig::default();
-      let (tfws_controller, tfws_metrics) =
-                <TerraformWorkspaceController as controller::Controller>::init(
-                    client,
-                    &global_config,
-                    &tfws_config,
-                )
-                .await
-                .unwrap();
-      let metrics = GlobalMetrics::new(tfws_metrics);
+      let k8s_app = kubox::App::new().namespaced_service::<TerraformWorkspace, TerraformWorkspaceError, _, _, _>("tedep",
+        |_| async {
+          info!("Reconciling");
+          Ok(())
+        },
+      ).run(client).await;
+      let metrics =
+        GlobalMetrics::new(TerraformWorkspaceMetrics);
 
       let http_app = Router::new()
         .route(
@@ -104,10 +106,9 @@ async fn main() {
         &"0.0.0.0:8080".parse().unwrap(),
       )
       .serve(http_app.into_make_service());
-
       tokio::select! {
-          _ = http_server => info!("http server exited"),
-          _ = tfws_controller => warn!("terraform workspace controller exited"),
+        _ = k8s_app => warn!("k8s server exited"),
+        _ = http_server => info!("http server exited")
       };
     },
     | Command::GenerateCrds(_args) => {
