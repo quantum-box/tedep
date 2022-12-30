@@ -12,10 +12,8 @@ use crate::controller::{
 };
 
 use self::{
-  config::TerraformWorkspaceConfig,
-  context::TerraformWorkspaceContext,
-  error::TerraformWorkspaceError,
-  metrics::TerraformWorkspaceMetrics,
+  config::WorkspaceConfig, context::WorkspaceContext,
+  error::WorkspaceError, metrics::WorkspaceMetrics,
 };
 
 pub mod config;
@@ -89,8 +87,8 @@ pub struct TerraformCloudConfig;
 impl Reconcilable for TerraformWorkspace {
   const FINALIZER_NAME: &'static str =
     "finalizer.tedep.quantum-box.com";
-  type Context = TerraformWorkspaceContext;
-  type Error = TerraformWorkspaceError;
+  type Context = WorkspaceContext;
+  type Error = WorkspaceError;
   fn error_policy(
     self: Arc<Self>,
     error: &Self::Error,
@@ -122,8 +120,8 @@ pub struct TerraformWorkspaceController;
 
 impl Controller for TerraformWorkspaceController {
   type Resource = TerraformWorkspace;
-  type Error = TerraformWorkspaceError;
-  type Metrics = TerraformWorkspaceMetrics;
-  type Context = TerraformWorkspaceContext;
-  type Config = TerraformWorkspaceConfig;
+  type Error = WorkspaceError;
+  type Metrics = WorkspaceMetrics;
+  type Context = WorkspaceContext;
+  type Config = WorkspaceConfig;
 }

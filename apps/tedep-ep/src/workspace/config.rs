@@ -3,12 +3,12 @@ use crate::controller::Config;
 use super::TerraformWorkspace;
 
 #[derive(Clone, Default)]
-pub struct TerraformWorkspaceConfig {
+pub struct WorkspaceConfig {
   dynamic_type:
     <TerraformWorkspace as kube::Resource>::DynamicType,
 }
 
-impl Config for TerraformWorkspaceConfig {
+impl Config for WorkspaceConfig {
   type Resource = TerraformWorkspace;
 
   fn dynamic_type(

@@ -1,10 +1,12 @@
 use std::{marker::PhantomData, sync::Arc};
 
 use k8s_openapi::NamespaceResourceScope;
-use serde::de::DeserializeOwned;
 
 use crate::{
-  service::{EitherOrBoth, Scope},
+  service::{
+    EitherOrBoth, KubeReosurceDynamicType, KubeResource,
+    Scope,
+  },
   Request, Service,
 };
 
@@ -17,14 +19,36 @@ where
   _ph: PhantomData<(R, E, SC)>,
 }
 
-impl App<(), (), (), ()> {
-  pub fn new() -> Self {
+impl Default for App<(), (), (), ()> {
+  fn default() -> Self {
     Self {
       service: (),
       _ph: PhantomData,
     }
   }
 }
+
+type ArcServiceSetApp<S, R, E, SC, S2, R2, E2, SC2> = App<
+  (Arc<S2>, Arc<S>),
+  (R2, R),
+  EitherOrBoth<E2, E>,
+  (SC2, SC),
+>;
+type ArcServiceSetNamespacedApp<
+  S,
+  R,
+  E,
+  SC,
+  S2,
+  R2,
+  E2,
+  SC2,
+> = App<
+  (Arc<(Arc<S2>, Arc<String>)>, Arc<S>),
+  (R2, R),
+  EitherOrBoth<E2, E>,
+  (SC2, SC),
+>;
 
 impl<S, R, E, SC> App<S, R, E, SC>
 where
@@ -35,12 +59,7 @@ where
   pub fn cluster_service<R2, E2, S2>(
     self,
     service: S2,
-  ) -> App<
-    (Arc<S2>, Arc<S>),
-    (R2, R),
-    EitherOrBoth<E2, E>,
-    ((), SC),
-  >
+  ) -> ArcServiceSetApp<S, R, E, SC, S2, R2, E2, ()>
   where
     E2: Send + std::fmt::Debug,
     S: Send + Sync + 'static,
@@ -56,28 +75,22 @@ where
     self,
     namespace: &str,
     service: S2,
-  ) -> App<
-    (Arc<(Arc<S2>, Arc<String>)>, Arc<S>),
-    (R2, R),
-    EitherOrBoth<E2, E>,
-    (String, SC),
+  ) -> ArcServiceSetNamespacedApp<
+    S,
+    R,
+    E,
+    SC,
+    S2,
+    R2,
+    E2,
+    String,
   >
   where
     E: Send + std::fmt::Debug,
     S: Send + Sync + 'static,
-    R2: kube::Resource<Scope = NamespaceResourceScope>
-      + Clone
-      + DeserializeOwned
-      + std::fmt::Debug
-      + Send
-      + Sync
-      + 'static,
-    <R2 as kube::Resource>::DynamicType: Default
-      + std::hash::Hash
-      + std::cmp::Eq
-      + Clone
-      + std::fmt::Debug
-      + Unpin,
+    R2: KubeResource<NamespaceResourceScope>,
+    <R2 as kube::Resource>::DynamicType:
+      KubeReosurceDynamicType,
     E2: From<kube::Error>
       + std::fmt::Debug
       + Send

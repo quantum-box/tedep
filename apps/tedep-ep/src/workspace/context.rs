@@ -2,12 +2,10 @@ use std::{borrow::Cow, time::Duration};
 
 use crate::controller::{Config, Context};
 
-use super::{
-  config::TerraformWorkspaceConfig, TerraformWorkspace,
-};
+use super::{config::WorkspaceConfig, TerraformWorkspace};
 
 #[derive(Clone)]
-pub struct TerraformWorkspaceContext {
+pub struct WorkspaceContext {
   client: kube::Client,
   namespace_str: String,
   reconcile_interval: Duration,
@@ -16,8 +14,8 @@ pub struct TerraformWorkspaceContext {
     <TerraformWorkspace as kube::Resource>::DynamicType,
 }
 
-impl Context for TerraformWorkspaceContext {
-  type Config = TerraformWorkspaceConfig;
+impl Context for WorkspaceContext {
+  type Config = WorkspaceConfig;
 
   fn with_configs(
     client: &kube::Client,

@@ -2,30 +2,23 @@ use axum::{
   http::StatusCode, response::IntoResponse, Json, Router,
 };
 use clap::{Args, Parser, Subcommand};
-use futures::select;
-use k8s_openapi::api::core::v1::Namespace;
-use kube::{
-  runtime::controller::Action, CustomResourceExt,
-};
-use tfws::error::TerraformWorkspaceError;
+use kube::CustomResourceExt;
 use tower_http::trace::TraceLayer;
 use tracing::{info, log::warn};
 use tracing_subscriber::{prelude::*, EnvFilter, Registry};
+use workspace::error::WorkspaceError;
 
 use crate::{
-  config::GlobalConfig,
   metrics::GlobalMetrics,
-  tfws::{
-    config::TerraformWorkspaceConfig,
-    metrics::TerraformWorkspaceMetrics, TerraformWorkspace,
-    TerraformWorkspaceController,
+  workspace::{
+    metrics::WorkspaceMetrics, TerraformWorkspace,
   },
 };
 
 mod config;
 mod controller;
 mod metrics;
-mod tfws;
+mod workspace;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -56,7 +49,7 @@ struct GenerateCrdsArgs {}
 async fn main() {
   let args = MainArgs::parse();
   match args.command {
-    | Command::Run(args) => {
+    | Command::Run(_args) => {
       let logger = tracing_subscriber::fmt::layer();
       let env_filter = EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| EnvFilter::new("info"));
@@ -69,14 +62,13 @@ async fn main() {
 
       let client =
         kube::Client::try_default().await.unwrap();
-      let k8s_app = kubox::App::new().namespaced_service::<TerraformWorkspace, TerraformWorkspaceError, _, _, _>("tedep",
+      let k8s_app = kubox::App::default().namespaced_service::<TerraformWorkspace, WorkspaceError, _, _, _>("tedep",
         |_| async {
           info!("Reconciling");
           Ok(())
         },
       ).run(client).await;
-      let metrics =
-        GlobalMetrics::new(TerraformWorkspaceMetrics);
+      let metrics = GlobalMetrics::new(WorkspaceMetrics);
 
       let http_app = Router::new()
         .route(

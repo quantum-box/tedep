@@ -10,9 +10,61 @@ use kube::{
   runtime::controller::Action,
 };
 use serde::de::DeserializeOwned;
-use tracing::info;
 
 use crate::Request;
+
+pub trait KubeResource<SC>
+where
+  Self: kube::Resource<Scope = SC>
+    + Clone
+    + DeserializeOwned
+    + std::fmt::Debug
+    + Send
+    + Sync
+    + 'static,
+  <Self as kube::Resource>::DynamicType: Default
+    + std::hash::Hash
+    + std::cmp::Eq
+    + Clone
+    + std::fmt::Debug
+    + Unpin,
+{
+}
+
+pub trait KubeReosurceDynamicType
+where
+  Self: Default
+    + std::hash::Hash
+    + std::cmp::Eq
+    + Clone
+    + std::fmt::Debug
+    + Unpin,
+{
+}
+
+impl<KRD> KubeReosurceDynamicType for KRD where
+  Self: Default
+    + std::hash::Hash
+    + std::cmp::Eq
+    + Clone
+    + std::fmt::Debug
+    + Unpin
+{
+}
+
+impl<SC, KR> KubeResource<SC> for KR
+where
+  Self: kube::Resource<Scope = SC>
+    + Clone
+    + DeserializeOwned
+    + std::fmt::Debug
+    + Send
+    + Sync
+    + 'static,
+  <Self as kube::Resource>::DynamicType:
+    KubeReosurceDynamicType,
+{
+}
 
 #[async_trait::async_trait]
 pub trait Service<R, E, S>
@@ -40,19 +92,9 @@ where
 impl<R, E, Req, F, Fut> Service<R, E, String>
   for (Arc<F>, Arc<String>)
 where
-  R: kube::Resource<Scope = NamespaceResourceScope>
-    + Clone
-    + DeserializeOwned
-    + std::fmt::Debug
-    + Send
-    + Sync
-    + 'static,
-  <R as kube::Resource>::DynamicType: Default
-    + std::hash::Hash
-    + std::cmp::Eq
-    + Clone
-    + std::fmt::Debug
-    + Unpin,
+  R: KubeResource<NamespaceResourceScope>,
+  <R as kube::Resource>::DynamicType:
+    KubeReosurceDynamicType,
   E: From<kube::Error>
     + std::fmt::Debug
     + Send
@@ -72,10 +114,10 @@ where
     {
       let namespace =
         kube::Api::<Namespace>::all(client.clone());
-      let _ = namespace.get(&*self.1).await?;
+      let _ = namespace.get(&self.1).await?;
     }
     let resources =
-      kube::Api::<R>::namespaced(client.clone(), &*self.1);
+      kube::Api::<R>::namespaced(client.clone(), &self.1);
     let _ = resources
       .list(&ListParams::default().limit(1))
       .await?;
@@ -165,19 +207,9 @@ where
   E: Send,
   S: Service<R, E, SC> + Send + Sync + 'static,
   SC: Scope,
-  R2: kube::Resource<Scope = NamespaceResourceScope>
-    + Clone
-    + DeserializeOwned
-    + std::fmt::Debug
-    + Send
-    + Sync
-    + 'static,
-  <R2 as kube::Resource>::DynamicType: Default
-    + std::hash::Hash
-    + std::cmp::Eq
-    + Clone
-    + std::fmt::Debug
-    + Unpin,
+  R2: KubeResource<NamespaceResourceScope>,
+  <R2 as kube::Resource>::DynamicType:
+    KubeReosurceDynamicType,
   E2: From<kube::Error>
     + std::fmt::Debug
     + Send

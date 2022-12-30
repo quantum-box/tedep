@@ -19,7 +19,7 @@ impl GlobalConfig {
     self.retry_interval
   }
 
-  pub(crate) fn from_run_args(args: &RunArgs) -> Self {
+  pub(crate) fn _from_run_args(args: &RunArgs) -> Self {
     Self {
       namespace_str: args.namespace_str.to_owned(),
       reconcile_interval: Duration::from_secs(
